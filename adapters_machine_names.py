@@ -1,18 +1,38 @@
 """
 
-this is an updated version from shell_command_tests.py. I was able to get the strings to not be byte strings here,
-but i was worried about messing up the code so i made a different version of it to mess around with that.
+trying to combine the info i've gathered from decoded_bytelist.py and nic_machine_names.py to form a table
+with a NIC number, a nic name and a machine name.
 
 """
 
-
 import subprocess
 
-# run a basic command:
-# didnt work it just outputs and I could not save to a variable.
-# ipinfo = os.system("ipconfig /all")
-# print(ipinfo)
-# os.system('ipconfig | findstr /i "ipv4"')
+
+def get_nic_info():
+    """
+    gets a list of NIC names both the readable name and the machine name and returns it.
+
+    :return: non_byte_list - a list of nic names and their computer name.
+    """
+    nic_info = subprocess.check_output("WMIC nicconfig get description, SettingID", shell=True)
+    # output.decode("utf-8")
+
+    # print(nic_info)
+
+    nic_list = []
+    nic_list = nic_info.split(b"\r\r\n")
+
+    # for item in nic_list:
+    #     print(item)
+
+    non_byte_list = []
+    for item in nic_list:
+        non_byte_list.append(item.decode("utf-8"))
+
+    # for item in non_byte_list:
+    #     print(item)
+
+    return non_byte_list
 
 
 def get_adapters():
@@ -59,14 +79,8 @@ def get_adapters():
 
     return adapter_dict
 
-list = get_adapters()
+list_of_adapters = get_adapters()
+list_of_nics = get_nic_info()
 
-# print(list)
-# print(len(list))
-
-# a more concise list of NIC adapters in a numbered dictionary.
-for item in list:
-    print(f"{item} {list[item]}")
-
-
-
+print(list_of_adapters)
+print(list_of_nics)
