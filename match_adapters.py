@@ -134,4 +134,4 @@ final_dict = one_nic_dict(new_adapters, new_nic_info)
 #print(final_dict)
 
 for item in final_dict:
-    print(f'NIC {item} {final_dict[item]}')
+    print(f'NIC {item} : {final_dict[item]}')
