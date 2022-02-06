@@ -5,6 +5,7 @@ This is for gathering lana info from the registry, formatting it and matching it
 """
 
 import subprocess
+from prettytable import PrettyTable
 
 
 def get_nic_info():
@@ -284,17 +285,72 @@ def nic_list(adapters_dict, bindings):
     return bindings
 
 
-new_adapters = get_adapters()
-new_nic_info = format_nic_info(get_nic_info())
-final_dict = one_nic_dict(new_adapters, new_nic_info)
-final_bindings = get_nic_bindings()
-bindings_list = nic_list(final_dict, final_bindings)
-print(bindings_list)
+# display the data in a basic text table.
+def nic_table(list):
+    """
+    Takes the data from the bindings_list embedded list and displays it as a table.
 
-
-# TODO: display the data in a basic text table.
-def text_table(list):
-    pass
+    :param list: this should come from the bindings_list variable. This is an embedded list.
+    :return: None
+    """
+    table = PrettyTable()
+    table.field_names= ["IpV4/IpV6", "GUID", "Lana Number", "Adapter", "IP Address"]
+    for item in list:
+        table.add_row(item)
+    print(table)
 
 
 # TODO: add functionality to be able to edit the registry values for nic.
+
+def display_options():
+    print("Current lana information:")
+    getting_data = True
+    while getting_data:
+        new_adapters = get_adapters()
+        new_nic_info = format_nic_info(get_nic_info())
+        final_dict = one_nic_dict(new_adapters, new_nic_info)
+        final_bindings = get_nic_bindings()
+        bindings_list = nic_list(final_dict, final_bindings)
+        print("type 'help' for a list of commands.")
+        # gets user input and converts it to lowercase for easier parsing. 
+        user_choice = input("input a command: ").lower()
+        if user_choice == 'exit':
+            print("Goodbye.")
+            break
+        elif user_choice == 'help':
+            print("use one of the following options.")
+            print("'exit': Will exit application.")
+            print("'info': Displays current nic table.")
+        # Displays lana table from the nic_table() function.
+        elif user_choice == "info":
+            nic_table(bindings_list)
+        # Get user input on what values need changed.
+        elif user_choice == "change":
+            lana_change = []
+            lana_change.append(input("which Lana Number would you like to change?: "))
+            lana_change.append(input(f"which Lana Number would you like swap with {lana_change[0]}?: "))
+            #TODO: make sure lana_change[0] and lana_change[1] are correct.
+            change_lana(user_choice)
+        else:
+            print("that is not a valid command, type 'help' for a list of commands.")
+# TODO: Change the lana map
+def change_lana(input):
+    print(f"changing lana {input[0]}, and lana {input[1]}.")
+    # TODO: send command to change the lanamap in the registry.
+    # TODO: backup current registry fields for lana
+    # TODO: extract registry key
+    # TODO: format registry changes
+    # TODO: apply registry settings
+
+# new_adapters = get_adapters()
+# new_nic_info = format_nic_info(get_nic_info())
+# final_dict = one_nic_dict(new_adapters, new_nic_info)
+# final_bindings = get_nic_bindings()
+# bindings_list = nic_list(final_dict, final_bindings)
+
+display_options()
+# display_options(bindings_list)
+
+
+
+
