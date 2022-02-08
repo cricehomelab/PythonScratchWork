@@ -3,9 +3,39 @@
 This is for gathering lana info from the registry, formatting it and matching it to an identified NIC
 
 """
-
+import os
 import subprocess
+import logging
 from prettytable import PrettyTable
+from datetime import date, datetime
+
+
+# set up dates and times for logging.
+def today_is():
+    current_day = date.today()
+    current_day = current_day.strftime("%Y%m%d")
+    return current_day
+
+
+def log_time():
+    next_time = datetime.now()
+    next_time = next_time.strftime("%Y%m%d %H:%M:%S.%f")
+    return next_time
+
+# declare what day it is.
+day = today_is()
+
+
+# set up logging to work.
+logging.basicConfig(filename=f'{day}-logtest.log', encoding='utf-8', filemode='w', level=logging.DEBUG)
+
+def add_log(message, type):
+    if type == "info":
+        logging.info(f'{log_time()} : {message}')
+    elif type == "debug":
+        logging.debug(f'{log_time()} : {message}')
+    elif type == "warning":
+        logging.warning(f'{log_time()} : {message}')
 
 
 def get_nic_info():
@@ -14,6 +44,7 @@ def get_nic_info():
 
     :return: non_byte_list - a list of nic names and their computer name.
     """
+    add_log("getting NIC info", 'info')
     nic_info = subprocess.check_output("WMIC nicconfig get description, SettingID", shell=True)
     # output.decode("utf-8")
 
@@ -36,6 +67,7 @@ def get_nic_info():
 
 
 def format_nic_info(adapter_list):
+    add_log("formatting adapter information.", 'info')
     adapter_list_2 = []
     for item in adapter_list:
         adapter_list_2.append(item.split("  "))
@@ -87,6 +119,7 @@ def get_adapters():
 
     :return: dictionary with key pair entries {# : [<NIC Name>, <IPv4 address>], ...}
     """
+    add_log('getting adapters with IP addresses', 'info')
     # output a basic command to a variable
     output = subprocess.check_output("ipconfig /all", shell=True)
 
@@ -133,6 +166,7 @@ def one_nic_dict(adapters, nic):
     :param nic: list of NIC information containing ["english name", "guid", ....]
     :return: dictionary of {numbered key (int): ["english name", "IPv4", "GUID"]
     """
+    add_log('formatting adapters into a dictionary', 'info')
     # print(adapters)
     for i in range(len(adapters)):
         # print(f"{i} adapters {adapters} ")
@@ -154,6 +188,7 @@ def display_nic_info(nic_dictionary):
     :param nic_dictionary: a dictionary of nic info from the one_nic_dict() function.
     :return: None
     """
+    add_log('display_nic_info called', 'info')
     # TODO: this is only going to work in very specific scenarios. This will need to be completely re-worked, but since
     # it is currently not in use I am leaving it be.
     for item in nic_dictionary:
@@ -166,6 +201,11 @@ def display_nic_info(nic_dictionary):
 
 # next step is to read the lana bind and lana map registry values and add them to our final_dict display.
 def get_nic_bindings():
+    '''
+
+    :return:
+    '''
+    add_log('getting Nic info from the registry.', 'info')
     nic_binding = subprocess.check_output("reg query HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage /v bind",
                                           shell=True)
     lana_map = subprocess.check_output("reg query HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap",
@@ -255,6 +295,7 @@ def nic_list(adapters_dict, bindings):
     :param bindings: embedded list of bindings should come from final_bindings variable.
     :return: embedded list of collated data from the 2 parameters.
     """
+    add_log('creating nested list for table.', 'info')
     for num, item in enumerate(bindings):
         # print(final_bindings[num][0])
         # adds n/a for ipv6.
@@ -293,6 +334,7 @@ def nic_table(list):
     :param list: this should come from the bindings_list variable. This is an embedded list.
     :return: None
     """
+    add_log('creating table for nic information', 'info')
     table = PrettyTable()
     table.field_names= ["IpV4/IpV6", "GUID", "Lana Number", "Adapter", "IP Address"]
     for item in list:
@@ -303,6 +345,8 @@ def nic_table(list):
 # TODO: add functionality to be able to edit the registry values for nic.
 
 def display_options():
+
+    add_log('starting main loop', 'info')
     print("Current lana information:")
     getting_data = True
     while getting_data:
@@ -312,8 +356,9 @@ def display_options():
         final_bindings = get_nic_bindings()
         bindings_list = nic_list(final_dict, final_bindings)
         print("type 'help' for a list of commands.")
-        # gets user input and converts it to lowercase for easier parsing. 
+        # gets user input and converts it to lowercase for easier parsing.
         user_choice = input("input a command: ").lower()
+        # TODO: add an option to restore backup configurations.
         if user_choice == 'exit':
             print("Goodbye.")
             break
@@ -329,18 +374,30 @@ def display_options():
             lana_change = []
             lana_change.append(input("which Lana Number would you like to change?: "))
             lana_change.append(input(f"which Lana Number would you like swap with {lana_change[0]}?: "))
-            #TODO: make sure lana_change[0] and lana_change[1] are correct.
-            change_lana(user_choice)
+            #make sure lana_change[0] and lana_change[1] are generally correct.
+            if len(lana_change[0]) == 4 and len(lana_change[1]) == 4:
+                change_lana(lana_change)
+            else:
+                print("invalid lana numbers.")
         else:
             print("that is not a valid command, type 'help' for a list of commands.")
+
+
 # TODO: Change the lana map
 def change_lana(input):
+    add_log(f'changing lana {input[0]}, with lana {input[1]}', 'info')
+    print(input)
     print(f"changing lana {input[0]}, and lana {input[1]}.")
+    directory = os.getcwd()
+    filepath = directory + "\\backup.reg"
+    add_log(f"backing up reg key to {filepath}", "info")
+    # export reg key as a backup.
+    subprocess.check_output(f"reg export HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage {filepath}",
+                                       shell=True)
+    # TODO: extract lanmap.
+    # TODO: format changes.
     # TODO: send command to change the lanamap in the registry.
-    # TODO: backup current registry fields for lana
-    # TODO: extract registry key
-    # TODO: format registry changes
-    # TODO: apply registry settings
+
 
 # new_adapters = get_adapters()
 # new_nic_info = format_nic_info(get_nic_info())
@@ -351,6 +408,7 @@ def change_lana(input):
 display_options()
 # display_options(bindings_list)
 
+# TODO: Logging is available, and implemented. Need to be more granular with logging information.
 
 
 
