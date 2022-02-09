@@ -6,12 +6,12 @@ lines of code that could change a registry unconsciously and am marking them as 
 
 import subprocess
 
-# THIS WILL DELETE A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNNING
+# THIS WILL DELETE A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNING
 # ***************************************************************************************************************
 #subprocess.run("reg delete HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap /f")
 # ***************************************************************************************************************
 
-list = ['"LanaMap"=hex:01,00,01,01,01,02,01,03,01,04,01,05']
+
 
 
 # text_list = ['Windows Registry Editor Version 5.00 \n', '\n',
@@ -20,15 +20,18 @@ list = ['"LanaMap"=hex:01,00,01,01,01,02,01,03,01,04,01,05']
 line1 = "Windows Registry Editor Version 5.00 \n"
 line2 = "\n"
 line3 = "[HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage] \n"
-line4 = list
+line4 = '"LanaMap"=hex:01,00,01,01,01,02,01,03,01,04,01,05'
 linelist = [line1, line2, line3, line4]
 
+# creates and opens a file named regupdate.reg in the working directory
 file = open("regupdate.reg", "w")
+# adds the desired content to the .reg file. 
 file.writelines(line1)
 file.writelines(line2)
 file.writelines(line3)
 file.writelines(line4)
 file.close()
+
 
 # THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNNING
 # ********************************************************************************************************************
