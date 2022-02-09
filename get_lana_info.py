@@ -27,7 +27,7 @@ day = today_is()
 
 
 # set up logging to work.
-logging.basicConfig(filename=f'{day}-logtest.log', encoding='utf-8', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename=f'{day}-lana-change.log', encoding='utf-8', filemode='w', level=logging.DEBUG)
 
 def add_log(message, type):
     if type == "info":
@@ -46,23 +46,12 @@ def get_nic_info():
     """
     add_log("getting NIC info", 'info')
     nic_info = subprocess.check_output("WMIC nicconfig get description, SettingID", shell=True)
-    # output.decode("utf-8")
 
-    # print(nic_info)
-
-    nic_list = []
     nic_list = nic_info.split(b"\r\r\n")
-
-    # for item in nic_list:
-    #     print(item)
 
     non_byte_list = []
     for item in nic_list:
         non_byte_list.append(item.decode("utf-8"))
-
-    # for item in non_byte_list:
-    #     print(item)
-
     return non_byte_list
 
 
@@ -104,12 +93,8 @@ def format_nic_info(adapter_list):
         if item_holder[0] == " ":
             del item_holder[0]
         item_holder = "".join(item_holder)
-        # print(f'item holder ={item_holder}')
         del only_nic[num]
         only_nic.insert(num, item_holder)
-    # print(f'removed spaces??? : {only_nic}')
-
-
     return only_nic
 
 
@@ -169,34 +154,10 @@ def one_nic_dict(adapters, nic):
     add_log('formatting adapters into a dictionary', 'info')
     # print(adapters)
     for i in range(len(adapters)):
-        # print(f"{i} adapters {adapters} ")
-        # print(f"{adapters[i+1]}")
-        # print(new_adapters[i + 1][0])
         for num, x in enumerate(nic):
-            # print(f"x = {x}")
             if adapters[i + 1][0] in x:
-                # print(f'should be a guid {new_nic_info[num + 1]}')
                 adapters[i + 1].append(nic[num + 1])
-    # print(f'end state of adpters {adapters}')
     return adapters
-
-
-def display_nic_info(nic_dictionary):
-    """
-    displays nic info cleanly in the terminal.
-
-    :param nic_dictionary: a dictionary of nic info from the one_nic_dict() function.
-    :return: None
-    """
-    add_log('display_nic_info called', 'info')
-    # TODO: this is only going to work in very specific scenarios. This will need to be completely re-worked, but since
-    # it is currently not in use I am leaving it be.
-    for item in nic_dictionary:
-        if range(nic_dictionary[item] == 3):
-            print(f'NIC {item} , {nic_dictionary[item][0]} , {nic_dictionary[item][1]} , {nic_dictionary[item][2]}')
-        else:
-            nic_dictionary[item].append(' n/a ')
-            print(f'NIC {item} , {nic_dictionary[item][0]} , {nic_dictionary[item][1]} , {nic_dictionary[item][2]} ')
 
 
 # next step is to read the lana bind and lana map registry values and add them to our final_dict display.
@@ -210,78 +171,50 @@ def get_nic_bindings():
                                           shell=True)
     lana_map = subprocess.check_output("reg query HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap",
                                        shell=True)
-    # decode_nic_binding = nic_binding.decode("utf-8")
-    # decode_lana_map = nic_binding.decode("utf-8")
 
-    # print(nic_binding)
-    # print(lana_map)
-    # TODO: make lana_map readable and split the lana numbers into a list.
-
-    # TODO: Format the NIC Binding Key.
+    # make lana_map readable and split the lana numbers into a list.
+    # Format the NIC Binding Key.
     split_binding = nic_binding.split(b"\r\n")
-    # print(split_binding[2])
     needed_bindings = split_binding[2]
-    # print(needed_bindings)
     bindings_list_bits = needed_bindings.split(b"\\0")
-    # print(bindings_list_bits)
     binding_list = []
     for item in bindings_list_bits:
         binding_list.append(item.decode("utf-8"))
-        # print(item.decode("utf-8"))
-    # print(binding_list)
     binding_zero = binding_list.pop(0)
-    # print(binding_zero)
     binding_zero = binding_zero.split("\\")
-    # print(f'1. {binding_list[0]}')
-    #print(binding_zero)
-    # del binding_list[0]
     del binding_zero[0]
-    # print(f'2. {binding_list[0]}')
     binding_zero.insert(0, "\\")
     binding_zero = "".join(binding_zero)
-    # print(binding_zero)
-    # print(f'3. {binding_list[0]}')
     binding_list.insert(0, binding_zero)
-    # print(f'4. {binding_list[0]}')
 
     for num, item in enumerate(binding_list):
         item = item.split("_")
         del item[0]
         binding_list[num] = item
 
-    # for item in binding_list:
-    #     print(item)
-
-    # TODO: append the lana number to the binding_list
+    # append the lana number to the binding_list
     # 1. Get the lana map.
     # Isolate the registry key down to just the lana map.
     lana_map = lana_map.split(b"\r\n")
-    # print(lana_map)
     lana_map = lana_map[2]
-    # print(lana_map)
     lana_map = lana_map.decode("utf-8")
     lana_map = lana_map.split("    ")
-    # print(lana_map)
     lana_map = lana_map[3]
     lana_map = list(lana_map)
-    # print(lana_map)
     holder = []
     lana_list = []
     for num, item in enumerate(lana_map, 1):
         holder.append(item)
         if num % 4 == 0:
             holder = "".join(holder)
-            # print(holder)
             lana_list.append(holder)
             holder = []
-            # print(f"holder = {holder}: num = {num}")
-    # print(lana_list)
     lana_map = "".join(lana_map)
     # print(lana_map)
     # lana list holds the lana values like this '010#' where # is the lana position.
     # i want the lana_map so we can edit this later.
     # i want the lana list so we can parse that with the list we already have.
-    # TODO: merge binding_list and lana_list
+    # merge binding_list and lana_list
     for num, item in enumerate(lana_list):
         binding_list[num].append(item)
     return binding_list
@@ -297,28 +230,21 @@ def nic_list(adapters_dict, bindings):
     """
     add_log('creating nested list for table.', 'info')
     for num, item in enumerate(bindings):
-        # print(final_bindings[num][0])
         # adds n/a for ipv6.
         # TODO: might want to add the readable nic name later.
         if bindings[num][0] == "Tcpip6":
-            # print("true")
             bindings[num].append("N/A")
             bindings[num].append("N/A")
-        # add the readable nic name and IP address.
         else:
-            # print('false')
-            #looping through final_dict to get associated readable nic name and ipv4 address.
+            # looping through final_dict to get associated readable nic name and ipv4 address.
             # this will get the machine guids we need but not all of them will be associated with an IP address.
             # we need to sort these out and add 2 "N/A" fields to their list.
             # we also need to add the readable name and IP address to the ips that have this associated with it.
-            # print(f'final_bindings[{num}][1] = {bindings[num][1]}')
             for items in adapters_dict:
                 if adapters_dict[items][2] == bindings[num][1]:
                     # print('True')
                     bindings[num].append(adapters_dict[items][0])
                     bindings[num].append(adapters_dict[items][1])
-                # currently somehow this entry is getting removed from final_bindings ['Tcpip', '{0592B33F-5CA6-4F46-88EC-3FA21B143809}', '0104'],
-                # Not sure why.
     for num, item in enumerate(bindings):
         if len(item) == 3:
             bindings[num].append("N/A")
@@ -345,7 +271,6 @@ def nic_table(list):
 # TODO: add functionality to be able to edit the registry values for nic.
 
 def display_options():
-
     add_log('starting main loop', 'info')
     print("Current lana information:")
     getting_data = True
