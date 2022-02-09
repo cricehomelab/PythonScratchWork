@@ -1,4 +1,0 @@
-Windows Registry Editor Version 5.00 
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetBIOS\Linkage] 
-"LanaMap"=hex:01,00,01,01,01,02,01,03,01,04,01,05
