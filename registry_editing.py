@@ -1,7 +1,15 @@
+"""
+This was the result of playing around in a VM trying to see how i can update the LanaMap registry value I have commented
+lines of code that could change a registry unconsciously and am marking them as dangerous.
+
+"""
+
 import subprocess
 
-subprocess.run("reg delete HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap /f")
-
+# THIS WILL DELETE A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNNING
+# ***************************************************************************************************************
+#subprocess.run("reg delete HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap /f")
+# ***************************************************************************************************************
 
 list = ['"LanaMap"=hex:01,00,01,01,01,02,01,03,01,04,01,05']
 
@@ -22,5 +30,8 @@ file.writelines(line3)
 file.writelines(line4)
 file.close()
 
-subprocess.run('reg import regupdate.reg')
-subprocess.check_output('reg query HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap')
+# THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNNING
+# ********************************************************************************************************************
+#subprocess.run('reg import regupdate.reg')
+#subprocess.check_output('reg query HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap')
+# ********************************************************************************************************************
