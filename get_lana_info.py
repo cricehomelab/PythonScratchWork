@@ -203,6 +203,7 @@ def get_nic_bindings():
     lana_map = list(lana_map)
     holder = []
     lana_list = []
+
     for num, item in enumerate(lana_map, 1):
         holder.append(item)
         if num % 4 == 0:
@@ -217,7 +218,7 @@ def get_nic_bindings():
     # merge binding_list and lana_list
     for num, item in enumerate(lana_list):
         binding_list[num].append(item)
-    return binding_list
+    return binding_list, lana_list
 
 
 def nic_list(adapters_dict, bindings):
@@ -272,13 +273,15 @@ def nic_table(list):
 
 def display_options():
     add_log('starting main loop', 'info')
-    print("Current lana information:")
     getting_data = True
     while getting_data:
         new_adapters = get_adapters()
         new_nic_info = format_nic_info(get_nic_info())
         final_dict = one_nic_dict(new_adapters, new_nic_info)
-        final_bindings = get_nic_bindings()
+        bindings_and_map = []
+        bindings_and_map = get_nic_bindings()
+        final_bindings = bindings_and_map[0]
+        lana_map = bindings_and_map[1]
         bindings_list = nic_list(final_dict, final_bindings)
         print("type 'help' for a list of commands.")
         # gets user input and converts it to lowercase for easier parsing.
@@ -301,28 +304,82 @@ def display_options():
             lana_change.append(input(f"which Lana Number would you like swap with {lana_change[0]}?: "))
             #make sure lana_change[0] and lana_change[1] are generally correct.
             if len(lana_change[0]) == 4 and len(lana_change[1]) == 4:
-                change_lana(lana_change)
+                change_lana(lana_change, lana_map)
             else:
                 print("invalid lana numbers.")
         else:
             print("that is not a valid command, type 'help' for a list of commands.")
 
 
+def split(word):
+    return [char for char in word]
+
+
 # TODO: Change the lana map
-def change_lana(input):
+def change_lana(input, lana):
     add_log(f'changing lana {input[0]}, with lana {input[1]}', 'info')
     print(input)
     print(f"changing lana {input[0]}, and lana {input[1]}.")
     directory = os.getcwd()
+    # TODO: enable a way to make multiple backups.
     filepath = directory + "\\backup.reg"
     add_log(f"backing up reg key to {filepath}", "info")
     # export reg key as a backup.
-    subprocess.check_output(f"reg export HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage {filepath}",
-                                       shell=True)
-    # TODO: extract lanmap.
-    # TODO: format changes.
+    # TODO: Re-enable
+    # subprocess.check_output(f"reg export HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage {filepath}",
+    #                                    shell=True)
+    # TODO: should probably check to make sure they are valid changes
+    print(lana)
+    lana_num_1 =lana.index(input[0])
+    lana_num_2 = lana.index(input[1])
+    lana[lana_num_1] = input[1]
+    lana[lana_num_2] = input[0]
+    lana = "".join(lana)
+    print(f'lana = {lana}')
+    lana = split(lana)
+    # print(lana)
+    newstring = ''
+    holder = []
+    new_list = []
+    for num, item in enumerate(lana, 1):
+        holder.append(item)
+        if num % 2 == 0:
+            new_list.append(holder)
+            holder = []
+    lana = new_list
+    # print(lana)
+    del lana[0]
+    for num, item in enumerate(lana):
+        if type(item) == list:
+            lana[num] = str(item[0] + item[1])
+            # print(item)
+    # print(lana)
+    lana = ",".join(lana)
+    print(lana)
     # TODO: send command to change the lanamap in the registry.
+    # THIS WILL DELETE A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNING
+    # ***************************************************************************************************************
+    # subprocess.run("reg delete HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap /f")
+    # ***************************************************************************************************************
+    line1 = "Windows Registry Editor Version 5.00 \n"
+    line2 = "\n"
+    line3 = "[HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage] \n"
+    line4 = '"LanaMap"=hex:01,00,01,01,01,02,01,03,01,04,01,05'
+    linelist = [line1, line2, line3, line4]
 
+    # creates and opens a file named regupdate.reg in the working directory
+    file = open("regupdate.reg", "w")
+    # adds the desired content to the .reg file.
+    file.writelines(line1)
+    file.writelines(line2)
+    file.writelines(line3)
+    file.writelines(line4)
+    file.close()
+    # THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNING
+    # ********************************************************************************************************************
+    # subprocess.run('reg import regupdate.reg')
+    # subprocess.check_output('reg query HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap')
+    # ********************************************************************************************************************
 
 # new_adapters = get_adapters()
 # new_nic_info = format_nic_info(get_nic_info())

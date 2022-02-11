@@ -10,13 +10,6 @@ import subprocess
 # ***************************************************************************************************************
 #subprocess.run("reg delete HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap /f")
 # ***************************************************************************************************************
-
-
-
-
-# text_list = ['Windows Registry Editor Version 5.00 \n', '\n',
-#             '[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetBIOS\Linkage]\n',
-#             list]
 line1 = "Windows Registry Editor Version 5.00 \n"
 line2 = "\n"
 line3 = "[HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage] \n"
@@ -25,15 +18,13 @@ linelist = [line1, line2, line3, line4]
 
 # creates and opens a file named regupdate.reg in the working directory
 file = open("regupdate.reg", "w")
-# adds the desired content to the .reg file. 
+# adds the desired content to the .reg file.
 file.writelines(line1)
 file.writelines(line2)
 file.writelines(line3)
 file.writelines(line4)
 file.close()
-
-
-# THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNNING
+# THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNING
 # ********************************************************************************************************************
 #subprocess.run('reg import regupdate.reg')
 #subprocess.check_output('reg query HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap')
