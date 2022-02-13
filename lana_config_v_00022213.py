@@ -12,9 +12,11 @@
 # DISCLAIMER **********************************************************************************************************
 # *********************************************************************************************************************
 # I am a novice to Python, and programming in general. I would advise EXTREME caution if you intend to run this on your
-# own system and I would strongly recomend making a backup of your registry for linkage
-# \HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetBIOS\Linkage registry entry before attempting to run this in the
-# event of any unintended side effects.
+# own system and I would strongly recommend making a backup of your registry for linkage the target location for this
+# code in the registry is:
+# \HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetBIOS\Linkage
+# I 100% recommend backing up this registry entry before attempting to run this in the event of any unintended side
+# effects.
 # This application will alter your windows registry, assuming the profile you are using has valid access to make the
 # change.
 # If you intend to use this I recommend going over the code and verifying that the program is working correctly with
@@ -42,13 +44,17 @@
 # 0   .0   .0222 .13
 #
 # Current List of improvements to make:
-# TODO: add an option to restore backup registry configuaration from the backup made during the "change" option.
+# TODO: add an option to restore backup registry configuration from the backup made during the "change" option.
 # TODO: Enable a way to have more than one backup.
 # TODO: I do have logging implemented but I need to add more logging info and better ways to track issues in the code.
 #  Should also work on what is info, what should be a warning, and what should be debug.
 # TODO: figure out how to change this all automatically from a config file.
-# TODO: see what other infomation can be acquired from the "info" option to make the lana change decision easier to
+# TODO: see what other information can be acquired from the "info" option to make the lana change decision easier to
 #  make.
+# TODO: build some better documentation, and improve the built in function documentation.
+#
+# Changes Implemented:
+#
 
 
 
