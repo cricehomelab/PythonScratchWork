@@ -403,7 +403,7 @@ def change_lana(input, lana):
     # subprocess.check_output(f"reg export HKLM\\SYSTEM\\ControlSet001\\Services\\NetBIOS\\Linkage {filepath}",
     #                                    shell=True)
     # TODO: should probably check to make sure they are valid changes
-    print(f'lana = {lana}')
+    # print(f'lana = {lana}')
     lana_num_1 =lana.index(input[0])
     lana_num_2 = lana.index(input[1])
     lana[lana_num_1] = input[1]
@@ -422,17 +422,22 @@ def change_lana(input, lana):
             new_list.append(holder)
             holder = []
     lana = new_list
-    print(f'new_list = {new_list}')
-    # TODO: BUG ALERT there is something here that is removing list elements.
+    # print(f'lana = {lana}')
+    # print(f'lana[0] = {lana[0]}')
+    # del lana[0]
     for num, item in enumerate(lana):
         if type(item) == list:
             lana[num] = str(item[0] + item[1])
             # print(item)
-    print(f'lana = {lana}')
+            # print(lana[num])
+            print(lana)
+    # print(f'lana after join {lana}')
     lana.insert(0, '"LanaMap"=hex:')
-    # print(lana)
-    lana[0] = lana[0] + lana[1]
+    # print(f'lana after inserting reg info {lana}')
+    # lana[0] = lana[0] + lana[1]
+    # print(f'lana after condensing position 0 and 1, {lana}')
     lana = ",".join(lana)
+    lana = lana[:14] + lana[15:]
     print(lana)
     # send command to change the lanamap in the registry.
     # THIS WILL DELETE A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNING
@@ -453,7 +458,9 @@ def change_lana(input, lana):
     file.writelines(line3)
     file.writelines(line4)
     file.close()
-    # THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE RUNNING
+    # THIS WILL IMPORT A REGISTRY KEY MAKE SURE IT WORKS BEFORE UN-COMMENTING
+    # Best way to check this is run this while commented then check for the regupdate.reg file and make sure it looks
+    # like the value you want it to be.
     # ********************************************************************************************************************
     # subprocess.run('reg import regupdate.reg')
     # subprocess.check_output('reg query HKEY_LOCAL_MACHINE\\System\\ControlSet001\\Services\\NetBIOS\\Linkage /v LanaMap')
